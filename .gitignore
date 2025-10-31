@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+.env
+.next/
+out/
+dist/
+cli/__pycache__/
+cli/output/
+__pycache__/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Build files
+*.pyc
