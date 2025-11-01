@@ -2,12 +2,68 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Inter', sans-serif;
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #171717;
+}
+::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 6px;
+  border: 2px solid #171717;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #737373;
 }
 
-a {
-  text-decoration: none;
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+
+body, html {
+  cursor: auto;
+}
+[data-hoverable="true"] {
+  cursor: pointer;
+}
+
+.magic-hover-button {
+  background-color: transparent;
+  border: none;
+  border-radius: 9999px;
+  position: relative;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.magic-hover-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.gallery-image-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.375rem;
+  transition: border-radius 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gallery-image-container img {
+  transform: scale(1.0);
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gallery-image-container:hover {
+  border-radius: 50%;
+}
+.gallery-image-container:hover img {
+  transform: scale(1.15);
+}
+
+.recharts-wrapper {
+  position: relative;
+}
+
+.viewer-btn {
+  @apply p-2 rounded-full text-white/70 bg-black/30 hover:text-white hover:bg-black/50 transition-all;
+}
+.viewer-btn-sm {
+  @apply p-2 rounded-full text-white/70 hover:text-white hover:bg-neutral-700 transition-all;
 }

@@ -1,21 +1,38 @@
+"use client";
 import "./../styles/globals.css";
+import { Plus_Jakarta_Sans, Space_Mono } from "next/font/google";
 import Navbar from "@/components/Navbar";
-import Sidebar from "@/components/Sidebar";
+import { PhotoProvider } from "@/contexts/PhotoContext";
 
-export const metadata = {
-  title: "Photo Analytica",
-  description: "Analyze your photo collection visually, without AI.",
-};
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-jakarta",
+});
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-space-mono",
+});
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className="flex bg-gray-50 text-gray-900">
-        <Sidebar />
-        <main className="flex-1 min-h-screen">
+    <html
+      lang="en"
+      className={`${jakarta.variable} ${spaceMono.variable} antialiased`}
+    >
+      <head>
+        <title>VYNX</title>
+        <meta name="description" content="VYNX Photo Analytics" />
+      </head>
+      <body className="font-sans bg-[#0B0B0B] text-[#EAEAEA] min-h-screen flex flex-col">
+        <PhotoProvider>
           <Navbar />
-          <div className="p-6">{children}</div>
-        </main>
+          <main className="flex-1 flex flex-col items-center pt-24 pb-10 px-4">
+            <div className="w-full">{children}</div>
+          </main>
+        </PhotoProvider>
       </body>
     </html>
   );
