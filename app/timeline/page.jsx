@@ -21,7 +21,8 @@ export default function TimelinePage() {
     <section className="flex flex-col w-full min-h-[70vh]">
       <header className="flex items-center justify-between pb-4 border-b border-neutral-800">
         <div>
-          <h1 className="text-3xl font-bold text-white">Timeline</h1>
+          <h1 className="text-3xl font-bold text-[#e5e5e5]">Timeline</h1>{" "}
+          {/* FIXED */}
           <p className="text-sm text-neutral-400">Photo activity over time.</p>
         </div>
       </header>
@@ -39,16 +40,16 @@ export default function TimelinePage() {
                   bottom: 5,
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#404040" />
-                <XAxis dataKey="name" stroke="#a3a3a3" fontSize={12} />
-                <YAxis stroke="#a3a3a3" fontSize={12} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#333333" />
+                <XAxis dataKey="name" stroke="#b3b3b3" fontSize={12} />
+                <YAxis stroke="#b3b3b3" fontSize={12} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "#171717",
-                    borderColor: "#404040",
+                    backgroundColor: "#1a1a1a",
+                    borderColor: "#333333",
                     borderRadius: "0.5rem",
                   }}
-                  labelStyle={{ color: "#ffffff" }}
+                  labelStyle={{ color: "#e5e5e5" }} /* FIXED */
                   itemStyle={{ color: "#8b5cf6" }}
                 />
                 <Bar dataKey="photos" fill="#8b5cf6" radius={[4, 4, 0, 0]} />

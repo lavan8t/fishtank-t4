@@ -2,30 +2,96 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   SCROLLBAR STYLING
+   ============================================ */
 ::-webkit-scrollbar {
   width: 10px;
 }
+
 ::-webkit-scrollbar-track {
-  background: #171717;
+  background: #1a1a1a;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #404040;
+  background: #333333;
   border-radius: 6px;
-  border: 2px solid #171717;
+  border: 2px solid #1a1a1a;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #737373;
+  background: #555555;
 }
 
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* Hide scrollbar utilities */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
 
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
+/* ============================================
+   BASE STYLES & FONTS
+   ============================================ */
 body, html {
-  cursor: auto;
+  cursor: none;
+  background-color: #0d0d0d;
+  color: #e5e5e5;
+  font-family: var(--font-sans), sans-serif !important;
 }
-[data-hoverable="true"] {
-  cursor: pointer;
+
+/* Default font is Instrument Sans */
+* {
+  font-family: var(--font-sans), sans-serif !important;
+}
+
+/* Headings use Instrument Serif */
+h1, h2, h3, h4, h5, h6,
+.heading,
+.title {
+  font-family: var(--font-serif), serif !important;
+  font-weight: 400;
+}
+
+/* PhotoViewer and related use Space Mono */
+.photo-viewer,
+.photo-viewer *,
+.viewer-metadata {
+  font-family: var(--font-mono), monospace !important;
+}
+
+/* ============================================
+   FONT UTILITY CLASSES
+   ============================================ */
+.font-sans {
+  font-family: var(--font-sans), sans-serif !important;
+}
+
+.font-serif {
+  font-family: var(--font-serif), serif !important;
+}
+
+.font-mono {
+  font-family: var(--font-mono), monospace !important;
+}
+
+.font-asset {
+  font-family: var(--font-asset), sans-serif !important;
+}
+
+/* ============================================
+   BUTTON STYLES
+   ============================================ */
+button {
+  @apply rounded-full uppercase tracking-widest font-semibold text-xs;
+  font-family: var(--font-sans), sans-serif !important;
+}
+
+button:disabled {
+  @apply opacity-30 cursor-not-allowed;
 }
 
 .magic-hover-button {
@@ -37,33 +103,178 @@ body, html {
 }
 
 .magic-hover-button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(229, 229, 229, 0.1);
 }
 
+/* ============================================
+   CUSTOM CURSOR
+   ============================================ */
+[data-hoverable="true"] {
+  cursor: none;
+}
+
+/* ============================================
+   PHOTO VIEWER BUTTONS
+   ============================================ */
+.viewer-btn {
+  @apply p-3 rounded-full text-white/70 bg-black/30 hover:text-white hover:bg-black/50 transition-all backdrop-blur-sm;
+  font-family: var(--font-mono), monospace !important;
+}
+
+.viewer-btn-sm {
+  @apply p-2 rounded-full text-white/70 hover:text-white hover:bg-neutral-700 transition-all;
+  font-family: var(--font-mono), monospace !important;
+}
+
+.viewer-btn:disabled,
+.viewer-btn-sm:disabled {
+  @apply opacity-30 cursor-not-allowed;
+}
+
+/* ============================================
+   GALLERY IMAGE ANIMATION
+   ============================================ */
 .gallery-image-container {
   position: relative;
   overflow: hidden;
-  border-radius: 0.375rem;
-  transition: border-radius 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0;
+  transition: border-radius 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .gallery-image-container img {
   transform: scale(1.0);
-  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .gallery-image-container:hover {
   border-radius: 50%;
 }
+
 .gallery-image-container:hover img {
   transform: scale(1.15);
 }
 
+/* ============================================
+   CHART STYLES
+   ============================================ */
 .recharts-wrapper {
   position: relative;
 }
 
-.viewer-btn {
-  @apply p-2 rounded-full text-white/70 bg-black/30 hover:text-white hover:bg-black/50 transition-all;
+.recharts-text {
+  font-family: var(--font-sans), sans-serif !important;
 }
-.viewer-btn-sm {
-  @apply p-2 rounded-full text-white/70 hover:text-white hover:bg-neutral-700 transition-all;
+
+/* ============================================
+   CUSTOM CURSOR ADVANCED STYLES
+   ============================================ */
+.CustomCursor_cursor__HzHPF {
+  background: #e5e5e5;
+  border: 1px solid var(--theme-foreground);
+  border-radius: 420px;
+  height: 24px;
+  left: 0;
+  mix-blend-mode: exclusion;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  transform: translate3d(-50%, -50%, 0);
+  width: 24px;
+  z-index: 1000;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .CustomCursor_cursor__HzHPF {
+    transition: transform 0.15s ease-in, width 0.1s ease-in, height 0.1s ease-in, opacity 0.1s ease-in;
+  }
+}
+
+.CustomCursor_cursor__HzHPF.-is-checked {
+  border-radius: 8px;
+}
+
+.CustomCursor_cursor__HzHPF.-active {
+  border-color: transparent;
+  height: 40px;
+  width: 40px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .CustomCursor_cursor__HzHPF.-active {
+    transition: width 0.1s ease-in-out, height 0.2s ease-in-out, opacity 0.2s ease-out 0.1s;
+  }
+}
+
+.CustomCursor_cursor__HzHPF.-leaving {
+  transition: width 0.1s ease-out, height 0.2s ease-out, opacity 0.15s ease-out;
+}
+
+.CustomCursor_cursor__HzHPF.-visually-hidden {
+  transition: width 0.1s ease-out, height 0.2s ease-out, opacity 0.15s ease-out;
+}
+
+.CustomCursor_cursor__label__pWDCc {
+  color: var(--theme-accent);
+  font-family: var(--font-mono), monospace !important;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  line-height: 1.5;
+  background: transparent;
+  color: #e5e5e5;
+  height: auto;
+  left: 0;
+  line-height: 1.24;
+  margin: 0 0 0 24px;
+  max-width: 200px;
+  mix-blend-mode: exclusion;
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  transform: translate3d(0, -50%, 0);
+  z-index: 1000;
+}
+
+.CustomCursor_cursor__label__pWDCc.-pill {
+  background-color: var(--theme-background);
+  border-radius: 20px;
+  color: #0d0d0d;
+  mix-blend-mode: unset;
+  padding: 8px 20px;
+  text-align: center;
+}
+
+.CustomCursor_cursor__label__pWDCc.-active {
+  margin-left: 8px;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .CustomCursor_cursor__label__pWDCc.-active {
+    transition: opacity 0.2s ease-in, left 0ms ease-in-out;
+  }
+}
+
+.CustomCursor_cursor__label--default__eH00n {
+  transition: opacity 0.2s ease-in, left 0.15s ease-in-out;
+}
+
+/* ============================================
+   UTILITY ANIMATIONS
+   ============================================ */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

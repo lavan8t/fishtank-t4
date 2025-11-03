@@ -1,159 +1,200 @@
 "use client";
+
 import {
   createContext,
-  useState,
   useContext,
-  useEffect,
-  useMemo,
+  useState,
   useCallback,
+  useEffect,
 } from "react";
 import * as db from "@/lib/db";
 
-const PhotoContext = createContext({
-  settings: {
-    folderPaths: [],
-    slideshowSpeed: 3000,
-  },
-  photos: [],
-  addPhotos: (processedPhotos, path) => {},
-  clearAllData: () => {},
-  updateSettings: (newSetting) => {},
-  removeFolderPath: (path) => {},
-});
+const PhotoContext = createContext();
 
-const SETTINGS_KEY = "vynx-settings";
-const DEFAULT_SETTINGS = { folderPaths: [], slideshowSpeed: 3000 };
-
-export function PhotoProvider({ children }) {
-  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+export const PhotoProvider = ({ children }) => {
   const [photos, setPhotos] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [settings, setSettings] = useState({
+    slideshowSpeed: 5000,
+    folderPaths: [],
+  });
+  const [ambientColor, setAmbientColor] = useState(null);
 
+  // Load photos from IndexedDB on mount
   useEffect(() => {
-    async function loadData() {
-      setIsLoading(true);
+    const loadPhotos = async () => {
       try {
-        const storedSettings = localStorage.getItem(SETTINGS_KEY);
-        if (storedSettings && storedSettings !== "undefined") {
-          setSettings(JSON.parse(storedSettings));
-        } else {
-          localStorage.setItem(SETTINGS_KEY, JSON.stringify(DEFAULT_SETTINGS));
-        }
-
-        const photosFromDb = await db.getAllPhotos();
-        setPhotos(photosFromDb);
-      } catch (e) {
-        console.error("Failed to load data, resetting settings:", e);
-        localStorage.setItem(SETTINGS_KEY, JSON.stringify(DEFAULT_SETTINGS));
-      } finally {
-        setIsLoading(false);
+        const allPhotos = await db.getAllPhotos();
+        console.log("Loaded photos from IndexedDB:", allPhotos);
+        setPhotos(allPhotos);
+      } catch (error) {
+        console.error("Error loading photos:", error);
       }
-    }
-    loadData();
+    };
+
+    loadPhotos();
   }, []);
 
-  const saveSettings = useCallback((newSettings) => {
-    setSettings(newSettings);
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(newSettings));
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedSettings = localStorage.getItem("photoSettings");
+      if (savedSettings) {
+        setSettings(JSON.parse(savedSettings));
+      }
+    } catch (error) {
+      console.error("Error loading settings:", error);
+    }
   }, []);
 
   const addPhotos = useCallback(
-    async (processedPhotos, path) => {
-      const newPhotosForState = [];
-      let duplicatesSkipped = 0;
+    async (processedPhotos, folderPath) => {
+      try {
+        console.log(
+          `Adding ${processedPhotos.length} photos from ${folderPath}`
+        );
 
-      for (const item of processedPhotos) {
-        const existing = await db.getFingerprint(item.fingerprint);
-        if (existing) {
-          duplicatesSkipped++;
-          continue;
+        const newPhotos = [];
+
+        for (const photo of processedPhotos) {
+          try {
+            // Ensure blobs are actual Blob objects
+            const thumbBlob =
+              photo.thumbnailBlob instanceof Blob
+                ? photo.thumbnailBlob
+                : new Blob([photo.thumbnailBlob]);
+
+            const fullSizeBlob =
+              photo.fullSizeBlob instanceof Blob
+                ? photo.fullSizeBlob
+                : new Blob([photo.fullSizeBlob]);
+
+            // Store in IndexedDB
+            const photoId = await db.addPhoto(
+              {
+                fileName: photo.fileName,
+                date: photo.date || photo.dateTaken,
+                dateTaken: photo.dateTaken,
+                cameraMake: photo.cameraMake,
+                cameraModel: photo.cameraModel,
+                focalLength: photo.focalLength,
+                aperture: photo.aperture,
+                iso: photo.iso,
+                shutterSpeed: photo.shutterSpeed,
+                width: photo.width,
+                height: photo.height,
+                latitude: photo.latitude,
+                longitude: photo.longitude,
+                fingerprint: photo.fingerprint,
+              },
+              thumbBlob,
+              fullSizeBlob
+            );
+
+            // Create blob URL for thumbnail
+            const thumbUrl = URL.createObjectURL(thumbBlob);
+
+            newPhotos.push({
+              id: photoId,
+              fileName: photo.fileName,
+              date: photo.date || photo.dateTaken,
+              dateTaken: photo.dateTaken,
+              cameraMake: photo.cameraMake,
+              cameraModel: photo.cameraModel,
+              focalLength: photo.focalLength,
+              aperture: photo.aperture,
+              iso: photo.iso,
+              shutterSpeed: photo.shutterSpeed,
+              width: photo.width,
+              height: photo.height,
+              latitude: photo.latitude,
+              longitude: photo.longitude,
+              fingerprint: photo.fingerprint,
+              thumbUrl,
+            });
+
+            console.log(`Successfully added photo: ${photo.fileName}`);
+          } catch (error) {
+            console.error(`Error adding photo ${photo.fileName}:`, error);
+          }
         }
 
-        const newId = await db.addPhoto(
-          item.metadata,
-          item.thumbBlob,
-          item.fullSizeBlob
-        );
-        await db.addFingerprint(item.fingerprint);
+        // Update state with new photos
+        setPhotos((prevPhotos) => [...prevPhotos, ...newPhotos]);
 
-        newPhotosForState.push({
-          ...item.metadata,
-          id: newId,
-          thumbUrl: URL.createObjectURL(item.thumbBlob),
-        });
+        // Update settings
+        if (folderPath && !settings.folderPaths.includes(folderPath)) {
+          const updatedSettings = {
+            ...settings,
+            folderPaths: [...settings.folderPaths, folderPath],
+          };
+          setSettings(updatedSettings);
+          localStorage.setItem(
+            "photoSettings",
+            JSON.stringify(updatedSettings)
+          );
+        }
+
+        console.log(`Successfully added ${newPhotos.length} photos`);
+      } catch (error) {
+        console.error("Error in addPhotos:", error);
       }
-
-      if (duplicatesSkipped > 0) {
-        console.log(`Skipped ${duplicatesSkipped} duplicate photos.`);
-      }
-
-      setPhotos((prev) => [...prev, ...newPhotosForState]);
-
-      saveSettings({
-        ...settings,
-        folderPaths: [...new Set([...settings.folderPaths, path])],
-      });
     },
-    [settings, saveSettings]
+    [settings]
   );
 
-  const removeFolderPath = useCallback(
-    (path) => {
-      db.clearAllData();
+  const updateSettings = useCallback((newSetting) => {
+    setSettings((prevSettings) => {
+      const updated = { ...prevSettings, ...newSetting };
+      localStorage.setItem("photoSettings", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const removeFolderPath = useCallback((path) => {
+    setSettings((prevSettings) => {
+      const updated = {
+        ...prevSettings,
+        folderPaths: prevSettings.folderPaths.filter((p) => p !== path),
+      };
+      localStorage.setItem("photoSettings", JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const clearAllData = useCallback(async () => {
+    try {
+      await db.clearAllData();
       setPhotos([]);
-      saveSettings({
-        ...settings,
-        folderPaths: settings.folderPaths.filter((p) => p !== path),
-      });
-    },
-    [settings, saveSettings]
-  );
-
-  const updateSettings = useCallback(
-    (newSetting) => {
-      saveSettings({ ...settings, ...newSetting });
-    },
-    [settings, saveSettings]
-  );
-
-  const clearAllData = useCallback(() => {
-    db.clearAllData();
-    setPhotos([]);
-    saveSettings(DEFAULT_SETTINGS);
-  }, [saveSettings]);
-
-  const value = useMemo(
-    () => ({
-      settings,
-      photos,
-      addPhotos,
-      removeFolderPath,
-      updateSettings,
-      clearAllData,
-    }),
-    [
-      settings,
-      photos,
-      addPhotos,
-      removeFolderPath,
-      updateSettings,
-      clearAllData,
-    ]
-  );
-
-  if (isLoading) {
-    return null;
-  }
+      setSettings({ slideshowSpeed: 5000, folderPaths: [] });
+      localStorage.removeItem("photoSettings");
+      console.log("All data cleared");
+    } catch (error) {
+      console.error("Error clearing data:", error);
+    }
+  }, []);
 
   return (
-    <PhotoContext.Provider value={value}>{children}</PhotoContext.Provider>
+    <PhotoContext.Provider
+      value={{
+        photos,
+        settings,
+        addPhotos,
+        updateSettings,
+        removeFolderPath,
+        clearAllData,
+        ambientColor,
+        setAmbientColor,
+      }}
+    >
+      {children}
+    </PhotoContext.Provider>
   );
-}
+};
 
-export function usePhotos() {
+export const usePhotos = () => {
   const context = useContext(PhotoContext);
   if (!context) {
-    throw new Error("usePhotos must be used within a PhotoProvider");
+    throw new Error("usePhotos must be used within PhotoProvider");
   }
   return context;
-}
+};

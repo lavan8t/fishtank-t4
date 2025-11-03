@@ -5,7 +5,7 @@ export default function NavIcon({ href, children, animationClasses }) {
   return (
     <Link
       href={href}
-      className={`flex items-center justify-center w-10 h-10 bg-neutral-800/50 rounded-full transition-all ease-in-out group hover:bg-neutral-700 ${animationClasses}`}
+      className={`flex items-center justify-center w-14 h-10 bg-neutral-800/50 rounded-full transition-all ease-in-out group hover:bg-neutral-700 ${animationClasses}`}
       data-hoverable="true"
     >
       <div className="flex-shrink-0 w-6 h-6 text-neutral-400 group-hover:text-white transition-colors">
